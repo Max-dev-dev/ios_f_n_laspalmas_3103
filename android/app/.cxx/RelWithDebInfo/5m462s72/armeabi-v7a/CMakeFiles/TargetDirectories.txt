@@ -1,0 +1,2 @@
+/Users/nazar/momento_las_palmas/android/app/.cxx/RelWithDebInfo/5m462s72/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/nazar/momento_las_palmas/android/app/.cxx/RelWithDebInfo/5m462s72/armeabi-v7a/CMakeFiles/rebuild_cache.dir

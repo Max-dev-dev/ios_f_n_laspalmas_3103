@@ -1,0 +1,185 @@
+{
+    "places": [
+      {
+        "time": "☀️ Dawnlight (06:00–12:00)",
+        "items": [
+          {
+            "id": 1,
+            "title": "Santa Catalina Park",
+            "description": "A lively park in the city center, perfect for morning walks and observing urban life.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1411°N, 15.4286°W",
+            "image_url": "assets/images/1.png"
+          },
+          {
+            "id": 2,
+            "title": "Santa Ana Cathedral",
+            "description": "The main cathedral of the city, showcasing impressive architecture, located in the historic Vegueta district.",
+            "rating": "★★★★★",
+            "coordinates": "28.1005°N, 15.4150°W",
+            "image_url": "assets/images/2.png"
+          },
+          {
+            "id": 3,
+            "title": "Vegueta Market",
+            "description": "A traditional market offering fresh produce and local delicacies, open in the mornings.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1008°N, 15.4137°W",
+            "image_url": "assets/images/3.png"
+          },
+          {
+            "id": 4,
+            "title": "Doramas Park",
+            "description": "A green oasis with fountains and tropical plants, ideal for relaxation.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1169°N, 15.4224°W",
+            "image_url": "assets/images/4.png"
+          },
+          {
+            "id": 5,
+            "title": "Plaza de España",
+            "description": "A popular meeting spot with cafes and shops, perfect for a morning coffee.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1276°N, 15.4366°W",
+            "image_url": "assets/images/5.png"
+          }
+        ]
+      },
+      {
+        "time": "🌤 Breeze (12:00–18:00)",
+        "items": [
+          {
+            "id": 6,
+            "title": "Las Canteras Beach",
+            "description": "A beautiful urban beach with golden sand, protected by a natural reef that creates calm swimming conditions.",
+            "rating": "★★★★★",
+            "coordinates": "28.1418°N, 15.4316°W",
+            "image_url": "assets/images/6.png"
+          },
+          {
+            "id": 7,
+            "title": "Alfredo Kraus Auditorium",
+            "description": "A modern concert hall with ocean views, hosting various daytime events and exhibitions.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1270°N, 15.4464°W",
+            "image_url": "assets/images/7.png"
+          },
+          {
+            "id": 8,
+            "title": "Las Arenas Shopping Center",
+            "description": "A large shopping mall near the beach, offering a variety of shops and dining options.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1265°N, 15.4453°W",
+            "image_url": "assets/images/8.png"
+          },
+          {
+            "id": 9,
+            "title": "Elder Museum of Science and Technology",
+            "description": "An interactive museum suitable for all ages, located in Santa Catalina Park.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1413°N, 15.4289°W",
+            "image_url": "assets/images/9.png"
+          },
+          {
+            "id": 10,
+            "title": "Romano Park",
+            "description": "A spacious park with jogging tracks and picnic areas, popular among locals.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1250°N, 15.4280°W",
+            "image_url": "assets/images/10.png"
+          }
+        ]
+      },
+      {
+        "time": "🌅 Sunset Glow (18:00–00:00)",
+        "items": [
+          {
+            "id": 11,
+            "title": "Triana District",
+            "description": "A bustling commercial area with numerous shops, restaurants, and bars, ideal for evening strolls.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1048°N, 15.4160°W",
+            "image_url": "assets/images/11.png"
+          },
+          {
+            "id": 12,
+            "title": "Bandama Caldera",
+            "description": "A large volcanic crater offering panoramic views, perfect for watching the sunset.",
+            "rating": "★★★★☆",
+            "coordinates": "28.0439°N, 15.4560°W",
+            "image_url": "assets/images/12.png"
+          },
+          {
+            "id": 13,
+            "title": "La Isleta Neighborhood",
+            "description": "A district with narrow streets and traditional houses, home to authentic restaurants and bars.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1500°N, 15.4280°W",
+            "image_url": "assets/images/13.png"
+          },
+          {
+            "id": 14,
+            "title": "Santa Ana Square",
+            "description": "A historic square in front of the cathedral, surrounded by old buildings and cafes.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1005°N, 15.4150°W",
+            "image_url": "assets/images/14.png"
+          },
+          {
+            "id": 15,
+            "title": "Columbus House",
+            "description": "A museum dedicated to Christopher Columbus's voyages, situated in a beautiful colonial building.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1014°N, 15.4143°W",
+            "image_url": "assets/images/15.png"
+          }
+        ]
+      },
+      {
+        "time": "🌙 Midnight Pulse (00:00–06:00)",
+        "items": [
+          {
+            "id": 16,
+            "title": "The Paper Club",
+            "description": "A popular nightclub in the city center with live music and DJ sets. Great for those who love a mix of dance and alternative beats.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1035°N, -15.4180°W",
+            "image_url": "assets/images/16.png"
+          },
+          {
+            "id": 17,
+            "title": "La Azotea de Benito",
+            "description": "A stylish rooftop bar with panoramic city views, serving some of the best cocktails in town. A great place for a relaxed but chic night out.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1245°N, -15.4360°W",
+            "image_url": "assets/images/17.png"
+          },
+          {
+            "id": 18,
+            "title": "Fortuni Nightclub",
+            "description": "An upscale club with an elegant interior, modern music, and an exclusive atmosphere. Ideal for those looking for a high-end nightlife experience.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1250°N, -15.4310°W",
+            "image_url": "assets/images/18.png"
+          },
+          {
+            "id": 19,
+            "title": "The Mansion",
+            "description": "A lively bar with a mix of great drinks, live music, and a vibrant crowd. A fantastic place to hang out late into the night.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1260°N, -15.4320°W",
+            "image_url": "assets/images/19.png"
+          },
+          {
+            "id": 20,
+            "title": "Boogie Nightclub",
+            "description": "A dynamic and energetic nightclub with a modern design and a mix of electronic and commercial music. Popular among both locals and tourists.",
+            "rating": "★★★★☆",
+            "coordinates": "28.1080°N, -15.4220°W",
+            "image_url": "assets/images/18.png"
+          }
+        ]
+      }
+    ]
+  }
+  

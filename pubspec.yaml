@@ -1,0 +1,61 @@
+name: momento_las_palmas
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # utils
+  logger: ^2.5.0
+  equatable: ^2.0.7
+  get_it: ^8.0.3
+  freezed_annotation: ^2.4.4
+  share_plus: ^10.1.4
+
+  # maps
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
+  # state management
+  flutter_bloc: ^9.0.0
+
+  # local data saving
+  shared_preferences: ^2.5.2
+
+  # routing
+  go_router: ^14.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  freezed: ^2.5.7
+  json_serializable: ^6.9.0
+  build_runner: ^2.4.13
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Raleway-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Raleway-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Raleway-ExtraBold.ttf
+          weight: 800
+
+  assets:
+    - assets/images/
+    - assets/images/splash_icons/
+    - assets/images/onboard_images/
+    - assets/images/spin_images/
+    - assets/local_data/
