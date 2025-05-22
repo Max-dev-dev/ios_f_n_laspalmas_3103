@@ -30,6 +30,13 @@ dependencies:
   # routing
   go_router: ^14.8.0
 
+  flutter_native_splash: ^2.4.5
+
+flutter_native_splash:
+  color: '#ffffff'
+  image: assets/images/l1.png
+  ios_content_mode: scaleAspectFill
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -59,3 +66,4 @@ flutter:
     - assets/images/onboard_images/
     - assets/images/spin_images/
     - assets/local_data/
+    - assets/images/bg.png

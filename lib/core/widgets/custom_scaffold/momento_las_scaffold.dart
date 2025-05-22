@@ -27,11 +27,20 @@ class MomentoLasScaffold extends StatelessWidget {
       create: (_) => getIt<PlacesCubit>(),
       child: Scaffold(
         appBar: _appBar(context, screenWidth),
-        backgroundColor: gradientBackground
-            ? Colors.transparent
-            : AppColors.colorBlackPrimary,
+        backgroundColor: Colors.transparent,
         body: Stack(
           children: <Widget>[
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/bg.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(),
+            ),
             Positioned.fill(child: body),
             Positioned(
               bottom: 50,
@@ -52,7 +61,11 @@ class MomentoLasScaffold extends StatelessWidget {
       AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFF3F3F3F),
-        toolbarHeight: Platform.isAndroid ? 130 : screenWidth > 375 ? 100 : 130,
+        toolbarHeight: Platform.isAndroid
+            ? 130
+            : screenWidth > 375
+                ? 100
+                : 130,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(32),
