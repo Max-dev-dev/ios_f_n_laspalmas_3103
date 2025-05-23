@@ -16,7 +16,7 @@ dependencies:
   get_it: ^8.0.3
   freezed_annotation: ^2.4.4
   share_plus: ^10.1.4
-
+  permission_handler: ^10.4.0
   # maps
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
@@ -31,6 +31,18 @@ dependencies:
   go_router: ^14.8.0
 
   flutter_native_splash: ^2.4.5
+  font_awesome_flutter: ^10.8.0
+  url_launcher: ^6.1.7
+  onesignal_flutter: ^5.1.2
+  appsflyer_sdk: ^6.15.2
+  http: ^1.2.1
+  advertising_id: ^2.0.0
+  flutter_inappwebview: ^6.1.5
+  image_picker: ^0.8.7+4
+  external_app_launcher: ^4.0.3
+  app_tracking_transparency: ^2.0.6+1
+  device_info_plus: ^11.4.0
+
 
 flutter_native_splash:
   color: '#ffffff'
@@ -67,3 +79,4 @@ flutter:
     - assets/images/spin_images/
     - assets/local_data/
     - assets/images/bg.png
+    - assets/images/l1.png

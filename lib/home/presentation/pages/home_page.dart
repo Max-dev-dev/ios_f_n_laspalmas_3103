@@ -16,8 +16,19 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  bool _showSplash = true;
   int _selectedIndex = 3;
   String? _mapCoordinates;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        _showSplash = false;
+      });
+    });
+  }
 
   void _onTabSelected(int index) {
     setState(() {
@@ -40,6 +51,17 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_showSplash) {
+      return Scaffold(
+        body: SizedBox.expand(
+          child: Image.asset(
+            'assets/images/l2.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
     Widget body;
     switch (_selectedIndex) {
       case 0:

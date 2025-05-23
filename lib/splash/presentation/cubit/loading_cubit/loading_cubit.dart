@@ -9,12 +9,12 @@ class LoadingCubit extends Cubit<LoadingState> {
 
   Future<void> loadApp() async {
     emit(LoadingInProgressState());
-
-    // Simulation of loading
     await Future.delayed(
       const Duration(seconds: 2),
     );
     FlutterNativeSplash.remove();
+
+
 
     emit(LoadedState());
   }
