@@ -200,7 +200,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
       // 3) Перевірка першого запуску
       if (isFirstLaunch) {
         // 4) Генерація timestamp_user_id
-        final ms = DateTime.now().millisecondsSinceEpoch;
+        final ms = DateTime
+            .now()
+            .millisecondsSinceEpoch;
         final rand = Random().nextInt(10000000).toString().padLeft(7, '0');
         timestampUserId = '$ms-$rand';
         await prefs.setString('timestamp_user_id', timestampUserId!);
@@ -322,10 +324,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        extendBodyBehindAppBar: true,
         backgroundColor: Colors.black,
-        body: SafeArea(
-          child: SizedBox.expand(
-            child: Image.asset('assets/images/l1.png', fit: BoxFit.cover),
+        body: SizedBox.expand(
+          child: Image.asset(
+            'assets/images/l1.png',
+            fit: BoxFit.cover,
           ),
         ),
       ),
