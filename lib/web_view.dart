@@ -45,7 +45,6 @@ Future<NavigationActionPolicy> handleDeepLinkIOS({
   final urlStr = uri.toString();
   final scheme = uri.scheme.toLowerCase();
 
-  // 1) Crypto-схеми: копіюємо в Clipboard + SnackBar
   const cryptoSchemes = [
     'ethereum',
     'bitcoin',
@@ -157,8 +156,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
   Widget build(BuildContext context) => MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Builder(
-        builder: (innerCtx) {
-          return PopScope<Object?>(
+        builder: (innerCtx) => PopScope<Object?>(
             canPop: false,
             onPopInvokedWithResult: (didPop, result) {
               _webViewController.canGoBack().then((canGoBack) {
@@ -186,9 +184,15 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                     supportMultipleWindows: true,
                   ),
                   onWebViewCreated: (ctrl) => _webViewController = ctrl,
-                  onPermissionRequest: (ctrl, req) async {
-                    if (req.resources.contains(PermissionResourceType.CAMERA)) {
-                      if (!await _askCamera()) {
+                  onPermissionRequest: (controller, request) async {
+                    if (request.resources.contains(PermissionResourceType.CAMERA)) {
+                      final status = await Permission.camera.request();
+                      if (status.isGranted) {
+                        return PermissionResponse(
+                          resources: request.resources,
+                          action: PermissionResponseAction.GRANT,
+                        );
+                      } else {
                         return PermissionResponse(
                           resources: [],
                           action: PermissionResponseAction.DENY,
@@ -196,7 +200,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                       }
                     }
                     return PermissionResponse(
-                      resources: req.resources,
+                      resources: request.resources,
                       action: PermissionResponseAction.GRANT,
                     );
                   },
@@ -223,7 +227,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                         ),
                       );
                       debugPrint('>>>>> OPEN WebPopupScreen');
-                      return false;
+                      return true;
                     }
 
                     await handleDeepLinkIOS(
@@ -260,8 +264,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                 ),
               ),
             ),
-          );
-        },
+          ),
       ),
     );
 }
@@ -280,7 +283,7 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
 
   @override
   Widget build(BuildContext context) => PopScope(
-      canPop: false,
+      canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         Navigator.of(context).pop();
       },
