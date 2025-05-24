@@ -8,7 +8,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Uri? extractFallbackUrl(String intentUrl) {
-  final match = RegExp(r'S\.browser_fallback_url=([^;]+)').firstMatch(intentUrl);
+  final match =
+      RegExp(r'S\.browser_fallback_url=([^;]+)').firstMatch(intentUrl);
   if (match == null) return null;
   final encoded = match.group(1)!;
   try {
@@ -19,43 +20,41 @@ Uri? extractFallbackUrl(String intentUrl) {
 }
 
 Future<void> _showAppNotFoundDialog(BuildContext ctx) => showDialog(
-  context: ctx,
-  builder: (dCtx) => AlertDialog(
-    title: const Text('Application not found'),
-    content: const Text(
-      'The required application is not installed on your device.',
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.of(dCtx).pop(),
-        child: const Text('OK'),
+      context: ctx,
+      builder: (dCtx) => AlertDialog(
+        title: const Text('Application not found'),
+        content: const Text(
+          'The required application is not installed on your device.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dCtx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
       ),
-    ],
-  ),
-);
+    );
 
 final Map<String, String Function(Uri)> _appLinkBuilders = {
-  'facebook.com':    (uri) => 'fb://facewebmodal/f?href=${uri.toString()}',
-  'instagram.com':   (uri) {
+  'facebook.com': (uri) => 'fb://facewebmodal/f?href=${uri.toString()}',
+  'instagram.com': (uri) {
     final user = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
     return 'instagram://user?username=$user';
   },
-  'twitter.com':     (uri) {
+  'twitter.com': (uri) {
     final user = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
     return 'twitter://user?screen_name=$user';
   },
-  'x.com':           (uri) {
+  'x.com': (uri) {
     final user = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
     return 'twitter://user?screen_name=$user';
   },
-  'wa.me':           (uri) => 'whatsapp://send?phone=${uri.pathSegments.first}',
-  'whatsapp.com':    (uri) => 'whatsapp://send?phone=${uri.pathSegments.first}',
+  'wa.me': (uri) => 'whatsapp://send?phone=${uri.pathSegments.first}',
+  'whatsapp.com': (uri) => 'whatsapp://send?phone=${uri.pathSegments.first}',
 };
 
-/// Спроба відкрити у нативному додатку, якщо не вийшло — в браузері
 Future<void> _openInAppOrBrowser(String url, BuildContext ctx) async {
   final uri = Uri.parse(url);
-  // знаходимо перший ключ, що міститься в host
   for (final entry in _appLinkBuilders.entries) {
     if (uri.host.contains(entry.key)) {
       final appUrl = entry.value(uri);
@@ -63,10 +62,9 @@ Future<void> _openInAppOrBrowser(String url, BuildContext ctx) async {
         await launchUrlString(appUrl, mode: LaunchMode.externalApplication);
         return;
       }
-      break; // знайшли, але додаток не працює → fallback на браузер
+      break;
     }
   }
-  // fallback — браузер
   if (await canLaunchUrlString(url)) {
     await launchUrlString(url, mode: LaunchMode.externalApplication);
   } else {
@@ -81,15 +79,21 @@ Future<NavigationActionPolicy> handleDeepLink({
 }) async {
   final urlStr = uri.toString();
   final scheme = uri.scheme.toLowerCase();
-  final host   = uri.host.toLowerCase();
+  final host = uri.host.toLowerCase();
 
   if (urlStr.startsWith('about:') || scheme == 'javascript') {
     return NavigationActionPolicy.CANCEL;
   }
 
   const cryptoSchemes = [
-    'ethereum','bitcoin','litecoin','tron',
-    'bsc','dogecoin','bitcoincash','tether',
+    'ethereum',
+    'bitcoin',
+    'litecoin',
+    'tron',
+    'bsc',
+    'dogecoin',
+    'bitcoincash',
+    'tether',
   ];
   if (cryptoSchemes.contains(scheme)) {
     await Clipboard.setData(ClipboardData(text: urlStr));
@@ -205,13 +209,12 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      // ловимо swipe-back і системний back
       onWillPop: () async {
         if (await _webViewController.canGoBack()) {
           _webViewController.goBack();
-          return false; // не робити ще одного pop
+          return false;
         }
-        return true; // вийти з цієї сторінки
+        return true;
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -219,8 +222,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
           top: true,
           bottom: true,
           child: InAppWebView(
-            // initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-            initialUrlRequest: URLRequest(url: WebUri('https://winspirit.com/')),
+            initialUrlRequest: URLRequest(url: WebUri(widget.url)),
             initialSettings: InAppWebViewSettings(
               transparentBackground: true,
               mediaPlaybackRequiresUserGesture: false,
@@ -230,7 +232,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
               supportMultipleWindows: false,
               useShouldOverrideUrlLoading: true,
               userAgent:
-              "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) "
+                  "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) "
                   "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 "
                   "Mobile/15E148 Safari/604.1",
             ),
@@ -240,7 +242,8 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
               if (request.resources.contains(PermissionResourceType.CAMERA)) {
                 granted.add(PermissionResourceType.CAMERA);
               }
-              if (request.resources.contains(PermissionResourceType.MICROPHONE)) {
+              if (request.resources
+                  .contains(PermissionResourceType.MICROPHONE)) {
                 granted.add(PermissionResourceType.MICROPHONE);
               }
               return PermissionResponse(
@@ -253,9 +256,8 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
             shouldOverrideUrlLoading: (controller, nav) async {
               final uri = nav.request.url!;
               final host = uri.host.toLowerCase();
-              // приклад popup для банків:
               if ((host.contains('express-connect.com') ||
-                  host.contains('mobile.rbcroyalbank.com')) &&
+                      host.contains('mobile.rbcroyalbank.com')) &&
                   (uri.scheme == 'http' || uri.scheme == 'https')) {
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => WebPopupScreen(initialUrl: uri.toString()),
@@ -308,9 +310,9 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
   }
 }
 
-// === Popup-екран ===
 class WebPopupScreen extends StatefulWidget {
   final String initialUrl;
+
   const WebPopupScreen({Key? key, required this.initialUrl}) : super(key: key);
 
   @override
@@ -323,7 +325,6 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      // свайп-back або фізична кнопка => один pop
       onWillPop: () async {
         Navigator.of(context).pop();
         return false;
@@ -342,12 +343,11 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
               useShouldOverrideUrlLoading: true,
             ),
             onWebViewCreated: (ctrl) => _popupController = ctrl,
-            shouldOverrideUrlLoading: (controller, nav) =>
-                handleDeepLink(
-                  uri: nav.request.url!,
-                  controller: controller,
-                  ctx: context,
-                ),
+            shouldOverrideUrlLoading: (controller, nav) => handleDeepLink(
+              uri: nav.request.url!,
+              controller: controller,
+              ctx: context,
+            ),
             onCloseWindow: (ctrl) => Navigator.of(context).pop(),
           ),
         ),
