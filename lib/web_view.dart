@@ -34,6 +34,46 @@ Future<void> _showAppNotFoundDialog(BuildContext ctx) => showDialog(
   ),
 );
 
+final Map<String, String Function(Uri)> _appLinkBuilders = {
+  'facebook.com':    (uri) => 'fb://facewebmodal/f?href=${uri.toString()}',
+  'instagram.com':   (uri) {
+    final user = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
+    return 'instagram://user?username=$user';
+  },
+  'twitter.com':     (uri) {
+    final user = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
+    return 'twitter://user?screen_name=$user';
+  },
+  'x.com':           (uri) {
+    final user = uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
+    return 'twitter://user?screen_name=$user';
+  },
+  'wa.me':           (uri) => 'whatsapp://send?phone=${uri.pathSegments.first}',
+  'whatsapp.com':    (uri) => 'whatsapp://send?phone=${uri.pathSegments.first}',
+};
+
+/// Спроба відкрити у нативному додатку, якщо не вийшло — в браузері
+Future<void> _openInAppOrBrowser(String url, BuildContext ctx) async {
+  final uri = Uri.parse(url);
+  // знаходимо перший ключ, що міститься в host
+  for (final entry in _appLinkBuilders.entries) {
+    if (uri.host.contains(entry.key)) {
+      final appUrl = entry.value(uri);
+      if (await canLaunchUrlString(appUrl)) {
+        await launchUrlString(appUrl, mode: LaunchMode.externalApplication);
+        return;
+      }
+      break; // знайшли, але додаток не працює → fallback на браузер
+    }
+  }
+  // fallback — браузер
+  if (await canLaunchUrlString(url)) {
+    await launchUrlString(url, mode: LaunchMode.externalApplication);
+  } else {
+    await _showAppNotFoundDialog(ctx);
+  }
+}
+
 Future<NavigationActionPolicy> handleDeepLink({
   required Uri uri,
   required InAppWebViewController controller,
@@ -41,6 +81,7 @@ Future<NavigationActionPolicy> handleDeepLink({
 }) async {
   final urlStr = uri.toString();
   final scheme = uri.scheme.toLowerCase();
+  final host   = uri.host.toLowerCase();
 
   if (urlStr.startsWith('about:') || scheme == 'javascript') {
     return NavigationActionPolicy.CANCEL;
@@ -57,22 +98,8 @@ Future<NavigationActionPolicy> handleDeepLink({
     return NavigationActionPolicy.CANCEL;
   }
 
-  const socialFallback = <String, String>{
-    'fb':        'https://www.facebook.com/',
-    'instagram':'https://www.instagram.com/',
-    'twitter':   'https://twitter.com/',
-    'x':         'https://twitter.com/',
-    'whatsapp':  'https://wa.me/',
-  };
-  if (socialFallback.containsKey(scheme)) {
-    if (await canLaunchUrlString(urlStr)) {
-      await launchUrlString(urlStr, mode: LaunchMode.externalApplication);
-    } else {
-      final webUrl = urlStr.replaceFirst(
-        '$scheme://', socialFallback[scheme]!,
-      );
-      await launchUrlString(webUrl, mode: LaunchMode.externalApplication);
-    }
+  if (_appLinkBuilders.keys.any((k) => host.contains(k))) {
+    await _openInAppOrBrowser(urlStr, ctx);
     return NavigationActionPolicy.CANCEL;
   }
 
