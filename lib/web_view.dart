@@ -152,12 +152,6 @@ class UrlWebViewApp extends StatefulWidget {
 class _UrlWebViewAppState extends State<UrlWebViewApp> {
   static const _chan = MethodChannel('app.camera/permission');
   late InAppWebViewController _webViewController;
-
-  Future<bool> _askCamera() async {
-    final status = await Permission.camera.request();
-    return status.isGranted;
-  }
-
   late String _webUrl;
 
   @override
@@ -170,9 +164,16 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
       ),
     );
 
-
-
     _initialize();
+
+    if (widget.openedByPush) {
+      if (widget.pushUrl == null || widget.pushUrl!.isEmpty) {
+        sendEvent('push_open_webview');
+      } else {
+        sendEvent('push_open_browser');
+      }
+      isPush = false;
+    }
 
     sendEvent('webview_open');
 
