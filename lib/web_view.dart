@@ -182,26 +182,26 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                     allowsBackForwardNavigationGestures: true,
                     javaScriptCanOpenWindowsAutomatically: true,
                     supportMultipleWindows: true,
+
                   ),
                   onWebViewCreated: (ctrl) => _webViewController = ctrl,
                   onPermissionRequest: (controller, request) async {
+                    final resources = <PermissionResourceType>[];
                     if (request.resources.contains(PermissionResourceType.CAMERA)) {
-                      final status = await Permission.camera.request();
-                      if (status.isGranted) {
-                        return PermissionResponse(
-                          resources: request.resources,
-                          action: PermissionResponseAction.GRANT,
-                        );
-                      } else {
-                        return PermissionResponse(
-                          resources: [],
-                          action: PermissionResponseAction.DENY,
-                        );
+                      if (await Permission.camera.request().isGranted) {
+                        resources.add(PermissionResourceType.CAMERA);
+                      }
+                    }
+                    if (request.resources.contains(PermissionResourceType.MICROPHONE)) {
+                      if (await Permission.microphone.request().isGranted) {
+                        resources.add(PermissionResourceType.MICROPHONE);
                       }
                     }
                     return PermissionResponse(
-                      resources: request.resources,
-                      action: PermissionResponseAction.GRANT,
+                      resources: resources,
+                      action: resources.isNotEmpty
+                          ? PermissionResponseAction.GRANT
+                          : PermissionResponseAction.DENY,
                     );
                   },
                   shouldOverrideUrlLoading: (ctrl, navAction) async {
@@ -227,7 +227,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                         ),
                       );
                       debugPrint('>>>>> OPEN WebPopupScreen');
-                      return true;
+                      return false;
                     }
 
                     await handleDeepLinkIOS(
@@ -235,7 +235,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                       controller: controller,
                       ctx: innerCtx,
                     );
-                    return false;
+                    return true;
                   },
                 ),
               ),
