@@ -13,7 +13,7 @@ The application is optimized for medium-sized mobile devices and has been tested
 - **Google Pixel 8 Pro (Android):** 950x448 px
 - **Apple iPhone 13 (iOS):** 844x390 px
 - **Apple iPhone 15 Pro (iOS):** 852x393 px
-
+ 
 ### System Requirements
 - **Flutter Version (using FVM):** 3.29.0
 - **Android Configuration:**
