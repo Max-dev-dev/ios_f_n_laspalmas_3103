@@ -5,13 +5,10 @@ import 'package:momento_las_palmas/ver_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Uri? extractFallbackUrl(String intentUrl) {
-  final match = RegExp(
-    r'S\.browser_fallback_url=([^;]+)',
-  ).firstMatch(intentUrl);
+  final match = RegExp(r'S\.browser_fallback_url=([^;]+)').firstMatch(intentUrl);
   if (match == null) return null;
   final encoded = match.group(1)!;
   try {
@@ -22,20 +19,20 @@ Uri? extractFallbackUrl(String intentUrl) {
 }
 
 Future<void> _showAppNotFoundDialog(BuildContext ctx) => showDialog(
-      context: ctx,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('Application not found'),
-        content: const Text(
-          'The required application is not installed on your device.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
+  context: ctx,
+  builder: (dCtx) => AlertDialog(
+    title: const Text('Application not found'),
+    content: const Text(
+      'The required application is not installed on your device.',
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(dCtx).pop(),
+        child: const Text('OK'),
       ),
-    );
+    ],
+  ),
+);
 
 Future<NavigationActionPolicy> handleDeepLink({
   required Uri uri,
@@ -60,20 +57,34 @@ Future<NavigationActionPolicy> handleDeepLink({
     return NavigationActionPolicy.CANCEL;
   }
 
+  const socialFallback = <String, String>{
+    'fb':        'https://www.facebook.com/',
+    'instagram':'https://www.instagram.com/',
+    'twitter':   'https://twitter.com/',
+    'x':         'https://twitter.com/',
+    'whatsapp':  'https://wa.me/',
+  };
+  if (socialFallback.containsKey(scheme)) {
+    if (await canLaunchUrlString(urlStr)) {
+      await launchUrlString(urlStr, mode: LaunchMode.externalApplication);
+    } else {
+      final webUrl = urlStr.replaceFirst(
+        '$scheme://', socialFallback[scheme]!,
+      );
+      await launchUrlString(webUrl, mode: LaunchMode.externalApplication);
+    }
+    return NavigationActionPolicy.CANCEL;
+  }
+
   if (scheme == 'http' || scheme == 'https' || scheme == 'file') {
     return NavigationActionPolicy.ALLOW;
   }
 
   if (urlStr.startsWith('intent://')) {
-    final pkgMatch = RegExp(r'package=([^;]+)').firstMatch(urlStr);
-    final packageName = pkgMatch?.group(1);
     final fallbackUri = extractFallbackUrl(urlStr);
-
-    // На iOS просто пробуємо canLaunch із самим intent-url
     if (await canLaunchUrlString(urlStr)) {
       await launchUrlString(urlStr, mode: LaunchMode.externalApplication);
-    }
-    else if (fallbackUri != null) {
+    } else if (fallbackUri != null) {
       await controller.loadUrl(
         urlRequest: URLRequest(url: WebUri(fallbackUri.toString())),
       );
@@ -166,12 +177,14 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope<Object?>(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
+    return WillPopScope(
+      // ловимо swipe-back і системний back
+      onWillPop: () async {
         if (await _webViewController.canGoBack()) {
           _webViewController.goBack();
+          return false; // не робити ще одного pop
         }
+        return true; // вийти з цієї сторінки
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -180,8 +193,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
           bottom: true,
           child: InAppWebView(
             // initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-            initialUrlRequest:
-            URLRequest(url: WebUri('https://winspirit.com/')),
+            initialUrlRequest: URLRequest(url: WebUri('https://winspirit.com/')),
             initialSettings: InAppWebViewSettings(
               transparentBackground: true,
               mediaPlaybackRequiresUserGesture: false,
@@ -214,20 +226,16 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
             shouldOverrideUrlLoading: (controller, nav) async {
               final uri = nav.request.url!;
               final host = uri.host.toLowerCase();
-              final path = uri.path.toLowerCase();
-
-              // Приклад: відкривати popup для конкретних URL
+              // приклад popup для банків:
               if ((host.contains('express-connect.com') ||
                   host.contains('mobile.rbcroyalbank.com')) &&
                   (uri.scheme == 'http' || uri.scheme == 'https')) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => WebPopupScreen(initialUrl: uri.toString()),
-                  ),
-                );
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => WebPopupScreen(initialUrl: uri.toString()),
+                ));
                 return NavigationActionPolicy.CANCEL;
               }
-
+              // інші deep-link-и
               return handleDeepLink(
                 uri: uri,
                 controller: controller,
@@ -273,10 +281,9 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
   }
 }
 
-/// Окремий popup-екран
+// === Popup-екран ===
 class WebPopupScreen extends StatefulWidget {
   final String initialUrl;
-
   const WebPopupScreen({Key? key, required this.initialUrl}) : super(key: key);
 
   @override
@@ -288,10 +295,11 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) async {
+    return WillPopScope(
+      // свайп-back або фізична кнопка => один pop
+      onWillPop: () async {
         Navigator.of(context).pop();
+        return false;
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -307,14 +315,13 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
               useShouldOverrideUrlLoading: true,
             ),
             onWebViewCreated: (ctrl) => _popupController = ctrl,
-            shouldOverrideUrlLoading: (controller, nav) async {
-              return handleDeepLink(
-                uri: nav.request.url!,
-                controller: controller,
-                ctx: context,
-              );
-            },
-            onCloseWindow: (controller) => Navigator.of(context).pop(),
+            shouldOverrideUrlLoading: (controller, nav) =>
+                handleDeepLink(
+                  uri: nav.request.url!,
+                  controller: controller,
+                  ctx: context,
+                ),
+            onCloseWindow: (ctrl) => Navigator.of(context).pop(),
           ),
         ),
         bottomNavigationBar: Container(
