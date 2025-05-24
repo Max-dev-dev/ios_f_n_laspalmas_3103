@@ -166,145 +166,114 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Builder(
-        builder: (innerCtx) {
-          return PopScope<Object?>(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, result) {
-              _webViewController.canGoBack().then((canGoBack) {
-                if (canGoBack) {
-                  _webViewController.goBack();
-                }
-              });
-            },
-            child: Scaffold(
-              backgroundColor: Colors.black,
-              body: SafeArea(
-                top: true,
-                bottom: true,
-                child: InAppWebView(
-                  initialUrlRequest:
-                      URLRequest(url: WebUri('https://winspirit.com/')),
-                  initialSettings: InAppWebViewSettings(
-                    transparentBackground: true,
-                    mediaPlaybackRequiresUserGesture: false,
-                    allowsInlineMediaPlayback: true,
-                    allowsBackForwardNavigationGestures: true,
-                    javaScriptCanOpenWindowsAutomatically: true,
-                    supportMultipleWindows: false,
-                    useShouldOverrideUrlLoading: true,
-                    userAgent:
-                        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
-                  ),
-                  onWebViewCreated: (ctrl) => _webViewController = ctrl,
-                  onPermissionRequest: (controller, request) async {
-                    final granted = <PermissionResourceType>[];
-                    if (request.resources.contains(PermissionResourceType.CAMERA)) {
-                      granted.add(PermissionResourceType.CAMERA);
-                    }
-                    if (request.resources.contains(PermissionResourceType.MICROPHONE)) {
-                      granted.add(PermissionResourceType.MICROPHONE);
-                    }
-                    return PermissionResponse(
-                      resources: granted,
-                      action: granted.isEmpty
-                          ? PermissionResponseAction.DENY
-                          : PermissionResponseAction.GRANT,
-                    );
-                  },
-                  shouldOverrideUrlLoading: (controller, nav) async {
-                    final uri = nav.request.url!;
-                    final scheme = uri.scheme.toLowerCase();
-                    final host = uri.host.toLowerCase();
-                    final path = uri.path.toLowerCase();
-
-                    if (host == 'myaccount.ing.com' &&
-                        path.contains('/payment-initiation/')) {
-                      const ingPackages = [
-                        'de.ingdiba.bankingapp',
-                        'com.ing.banking',
-                        'ro.ing.mobile.banking.android.activity',
-                        'com.ing.business',
-                        'com.ing.insidebusinessapp',
-                        'com.ingcb.mobile.cbportal',
-                      ];
-                      for (final pkg in ingPackages) {
-                        if (await LaunchApp.isAppInstalled(
-                            androidPackageName: pkg)) {
-                          await LaunchApp.openApp(
-                            androidPackageName: pkg,
-                            openStore: false,
-                          );
-                          return NavigationActionPolicy.CANCEL;
-                        }
-                      }
-                    }
-
-                    if ((host.contains('mobile.rbcroyalbank.com') ||
-                            host.contains('express-connect.com')) &&
-                        (scheme == 'http' || scheme == 'https')) {
-                      Navigator.of(innerCtx).push(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              WebPopupScreen(initialUrl: uri.toString()),
-                        ),
-                      );
-                      return NavigationActionPolicy.CANCEL;
-                    }
-
-                    return handleDeepLink(
-                      uri: uri,
-                      controller: controller,
-                      ctx: context,
-                    );
-                  },
-                  onCreateWindow: (controller, createReq) async {
-                    final uri = createReq.request.url;
-                    if (uri == null) return false;
-
-                    await handleDeepLink(
-                      uri: uri,
-                      controller: controller,
-                      ctx: innerCtx,
-                    );
-                    return true;
-                  },
-                ),
-              ),
-              bottomNavigationBar: Container(
-                height: 56,
-                color: Colors.black87,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
-                      onPressed: () async {
-                        if (await _webViewController.canGoBack()) {
-                          _webViewController.goBack();
-                        }
-                      },
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      onPressed: () {
-                        _webViewController.reload();
-                      },
-                    ),
-                  ],
-                ),
-              ),
+    return PopScope<Object?>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (await _webViewController.canGoBack()) {
+          _webViewController.goBack();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          top: true,
+          bottom: true,
+          child: InAppWebView(
+            // initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+            initialUrlRequest:
+            URLRequest(url: WebUri('https://winspirit.com/')),
+            initialSettings: InAppWebViewSettings(
+              transparentBackground: true,
+              mediaPlaybackRequiresUserGesture: false,
+              allowsInlineMediaPlayback: true,
+              allowsBackForwardNavigationGestures: true,
+              javaScriptCanOpenWindowsAutomatically: true,
+              supportMultipleWindows: false,
+              useShouldOverrideUrlLoading: true,
+              userAgent:
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) "
+                  "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 "
+                  "Mobile/15E148 Safari/604.1",
             ),
-          );
-        },
+            onWebViewCreated: (ctrl) => _webViewController = ctrl,
+            onPermissionRequest: (controller, request) async {
+              final granted = <PermissionResourceType>[];
+              if (request.resources.contains(PermissionResourceType.CAMERA)) {
+                granted.add(PermissionResourceType.CAMERA);
+              }
+              if (request.resources.contains(PermissionResourceType.MICROPHONE)) {
+                granted.add(PermissionResourceType.MICROPHONE);
+              }
+              return PermissionResponse(
+                resources: granted,
+                action: granted.isEmpty
+                    ? PermissionResponseAction.DENY
+                    : PermissionResponseAction.GRANT,
+              );
+            },
+            shouldOverrideUrlLoading: (controller, nav) async {
+              final uri = nav.request.url!;
+              final host = uri.host.toLowerCase();
+              final path = uri.path.toLowerCase();
+
+              // Приклад: відкривати popup для конкретних URL
+              if ((host.contains('express-connect.com') ||
+                  host.contains('mobile.rbcroyalbank.com')) &&
+                  (uri.scheme == 'http' || uri.scheme == 'https')) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => WebPopupScreen(initialUrl: uri.toString()),
+                  ),
+                );
+                return NavigationActionPolicy.CANCEL;
+              }
+
+              return handleDeepLink(
+                uri: uri,
+                controller: controller,
+                ctx: context,
+              );
+            },
+            onCreateWindow: (controller, createReq) async {
+              final uri = createReq.request.url;
+              if (uri == null) return false;
+              await handleDeepLink(
+                uri: uri,
+                controller: controller,
+                ctx: context,
+              );
+              return true;
+            },
+          ),
+        ),
+        bottomNavigationBar: Container(
+          height: 56,
+          color: Colors.black87,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () async {
+                  if (await _webViewController.canGoBack()) {
+                    _webViewController.goBack();
+                  }
+                },
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: () => _webViewController.reload(),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
+/// Окремий popup-екран
 class WebPopupScreen extends StatefulWidget {
   final String initialUrl;
 
@@ -338,14 +307,14 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
               useShouldOverrideUrlLoading: true,
             ),
             onWebViewCreated: (ctrl) => _popupController = ctrl,
-            shouldOverrideUrlLoading: (controller, navAction) async {
+            shouldOverrideUrlLoading: (controller, nav) async {
               return handleDeepLink(
-                uri: navAction.request.url!,
+                uri: nav.request.url!,
                 controller: controller,
                 ctx: context,
               );
             },
-            onCloseWindow: (ctrl) => Navigator.of(context).pop(),
+            onCloseWindow: (controller) => Navigator.of(context).pop(),
           ),
         ),
         bottomNavigationBar: Container(
@@ -355,16 +324,12 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                },
+                onPressed: () => Navigator.of(context).pop(),
               ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.refresh, color: Colors.white),
-                onPressed: () {
-                  _popupController.reload();
-                },
+                onPressed: () => _popupController.reload(),
               ),
             ],
           ),
