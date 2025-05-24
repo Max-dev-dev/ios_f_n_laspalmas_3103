@@ -22,22 +22,22 @@ Uri? extractFallbackUrl(String intentUrl) {
 }
 
 Future<void> _showAppNotFoundDialog(BuildContext ctx) => showDialog(
-    context: ctx,
-    builder: (dialogCtx) => AlertDialog(
-      title: const Text('Application not found'),
-      content: const Text(
-        'The required application is not installed on your device.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogCtx).pop(),
-          child: const Text('OK'),
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Application not found'),
+        content: const Text(
+          'The required application is not installed on your device.',
         ),
-      ],
-    ),
-  );
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
 
-Future<NavigationActionPolicy> handleDeepLinkIOS({
+Future<NavigationActionPolicy> handleDeepLink({
   required Uri uri,
   required InAppWebViewController controller,
   required BuildContext ctx,
@@ -45,15 +45,13 @@ Future<NavigationActionPolicy> handleDeepLinkIOS({
   final urlStr = uri.toString();
   final scheme = uri.scheme.toLowerCase();
 
+  if (urlStr.startsWith('about:') || scheme == 'javascript') {
+    return NavigationActionPolicy.CANCEL;
+  }
+
   const cryptoSchemes = [
-    'ethereum',
-    'bitcoin',
-    'litecoin',
-    'tron',
-    'bsc',
-    'dogecoin',
-    'bitcoincash',
-    'tether',
+    'ethereum','bitcoin','litecoin','tron',
+    'bsc','dogecoin','bitcoincash','tether',
   ];
   if (cryptoSchemes.contains(scheme)) {
     await Clipboard.setData(ClipboardData(text: urlStr));
@@ -62,20 +60,34 @@ Future<NavigationActionPolicy> handleDeepLinkIOS({
     return NavigationActionPolicy.CANCEL;
   }
 
-  if (urlStr == 'about:blank') {
-    return NavigationActionPolicy.CANCEL;
-  }
-
   if (scheme == 'http' || scheme == 'https' || scheme == 'file') {
     return NavigationActionPolicy.ALLOW;
   }
 
-  if (await canLaunchUrl(uri)) {
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (urlStr.startsWith('intent://')) {
+    final pkgMatch = RegExp(r'package=([^;]+)').firstMatch(urlStr);
+    final packageName = pkgMatch?.group(1);
+    final fallbackUri = extractFallbackUrl(urlStr);
+
+    // На iOS просто пробуємо canLaunch із самим intent-url
+    if (await canLaunchUrlString(urlStr)) {
+      await launchUrlString(urlStr, mode: LaunchMode.externalApplication);
+    }
+    else if (fallbackUri != null) {
+      await controller.loadUrl(
+        urlRequest: URLRequest(url: WebUri(fallbackUri.toString())),
+      );
+    } else {
+      await _showAppNotFoundDialog(ctx);
+    }
+    return NavigationActionPolicy.CANCEL;
+  }
+
+  if (await canLaunchUrlString(urlStr)) {
+    await launchUrlString(urlStr, mode: LaunchMode.externalApplication);
   } else {
     await _showAppNotFoundDialog(ctx);
   }
-
   return NavigationActionPolicy.CANCEL;
 }
 
@@ -153,10 +165,12 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context) {
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Builder(
-        builder: (innerCtx) => PopScope<Object?>(
+        builder: (innerCtx) {
+          return PopScope<Object?>(
             canPop: false,
             onPopInvokedWithResult: (didPop, result) {
               _webViewController.canGoBack().then((canGoBack) {
@@ -167,12 +181,10 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
             },
             child: Scaffold(
               backgroundColor: Colors.black,
-              extendBody: false,
               body: SafeArea(
                 top: true,
                 bottom: true,
                 child: InAppWebView(
-                  // initialUrlRequest: URLRequest(url: WebUri(widget.url)),
                   initialUrlRequest:
                       URLRequest(url: WebUri('https://winspirit.com/')),
                   initialSettings: InAppWebViewSettings(
@@ -181,35 +193,70 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                     allowsInlineMediaPlayback: true,
                     allowsBackForwardNavigationGestures: true,
                     javaScriptCanOpenWindowsAutomatically: true,
-                    supportMultipleWindows: true,
-
+                    supportMultipleWindows: false,
+                    useShouldOverrideUrlLoading: true,
+                    userAgent:
+                        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1",
                   ),
                   onWebViewCreated: (ctrl) => _webViewController = ctrl,
                   onPermissionRequest: (controller, request) async {
-                    final resources = <PermissionResourceType>[];
+                    final granted = <PermissionResourceType>[];
                     if (request.resources.contains(PermissionResourceType.CAMERA)) {
-                      if (await Permission.camera.request().isGranted) {
-                        resources.add(PermissionResourceType.CAMERA);
-                      }
+                      granted.add(PermissionResourceType.CAMERA);
                     }
                     if (request.resources.contains(PermissionResourceType.MICROPHONE)) {
-                      if (await Permission.microphone.request().isGranted) {
-                        resources.add(PermissionResourceType.MICROPHONE);
-                      }
+                      granted.add(PermissionResourceType.MICROPHONE);
                     }
                     return PermissionResponse(
-                      resources: resources,
-                      action: resources.isNotEmpty
-                          ? PermissionResponseAction.GRANT
-                          : PermissionResponseAction.DENY,
+                      resources: granted,
+                      action: granted.isEmpty
+                          ? PermissionResponseAction.DENY
+                          : PermissionResponseAction.GRANT,
                     );
                   },
-                  shouldOverrideUrlLoading: (ctrl, navAction) async {
-                    final uri = navAction.request.url;
-                    if (uri == null) return NavigationActionPolicy.CANCEL;
-                    return handleDeepLinkIOS(
+                  shouldOverrideUrlLoading: (controller, nav) async {
+                    final uri = nav.request.url!;
+                    final scheme = uri.scheme.toLowerCase();
+                    final host = uri.host.toLowerCase();
+                    final path = uri.path.toLowerCase();
+
+                    if (host == 'myaccount.ing.com' &&
+                        path.contains('/payment-initiation/')) {
+                      const ingPackages = [
+                        'de.ingdiba.bankingapp',
+                        'com.ing.banking',
+                        'ro.ing.mobile.banking.android.activity',
+                        'com.ing.business',
+                        'com.ing.insidebusinessapp',
+                        'com.ingcb.mobile.cbportal',
+                      ];
+                      for (final pkg in ingPackages) {
+                        if (await LaunchApp.isAppInstalled(
+                            androidPackageName: pkg)) {
+                          await LaunchApp.openApp(
+                            androidPackageName: pkg,
+                            openStore: false,
+                          );
+                          return NavigationActionPolicy.CANCEL;
+                        }
+                      }
+                    }
+
+                    if ((host.contains('mobile.rbcroyalbank.com') ||
+                            host.contains('express-connect.com')) &&
+                        (scheme == 'http' || scheme == 'https')) {
+                      Navigator.of(innerCtx).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              WebPopupScreen(initialUrl: uri.toString()),
+                        ),
+                      );
+                      return NavigationActionPolicy.CANCEL;
+                    }
+
+                    return handleDeepLink(
                       uri: uri,
-                      controller: ctrl,
+                      controller: controller,
                       ctx: context,
                     );
                   },
@@ -217,20 +264,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                     final uri = createReq.request.url;
                     if (uri == null) return false;
 
-                    final scheme = uri.scheme.toLowerCase();
-                    final url = uri.toString();
-
-                    if (scheme == 'http' || scheme == 'https') {
-                      Navigator.of(innerCtx).push(
-                        MaterialPageRoute(
-                          builder: (_) => WebPopupScreen(initialUrl: url),
-                        ),
-                      );
-                      debugPrint('>>>>> OPEN WebPopupScreen');
-                      return false;
-                    }
-
-                    await handleDeepLinkIOS(
+                    await handleDeepLink(
                       uri: uri,
                       controller: controller,
                       ctx: innerCtx,
@@ -264,9 +298,11 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
                 ),
               ),
             ),
-          ),
+          );
+        },
       ),
     );
+  }
 }
 
 class WebPopupScreen extends StatefulWidget {
@@ -282,31 +318,30 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
   late InAppWebViewController _popupController;
 
   @override
-  Widget build(BuildContext context) => PopScope(
+  Widget build(BuildContext context) {
+    return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         Navigator.of(context).pop();
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        extendBody: false,
         body: SafeArea(
           top: true,
-          bottom: false,
+          bottom: true,
           child: InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(widget.initialUrl)),
             initialSettings: InAppWebViewSettings(
               javaScriptCanOpenWindowsAutomatically: true,
               supportMultipleWindows: true,
               allowsBackForwardNavigationGestures: true,
+              useShouldOverrideUrlLoading: true,
             ),
             onWebViewCreated: (ctrl) => _popupController = ctrl,
-            shouldOverrideUrlLoading: (ctrl, navAction) async {
-              final uri = navAction.request.url;
-              if (uri == null) return NavigationActionPolicy.CANCEL;
-              return handleDeepLinkIOS(
-                uri: uri,
-                controller: ctrl,
+            shouldOverrideUrlLoading: (controller, navAction) async {
+              return handleDeepLink(
+                uri: navAction.request.url!,
+                controller: controller,
                 ctx: context,
               );
             },
@@ -336,4 +371,5 @@ class _WebPopupScreenState extends State<WebPopupScreen> {
         ),
       ),
     );
+  }
 }
