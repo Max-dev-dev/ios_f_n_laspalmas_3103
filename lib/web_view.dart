@@ -170,14 +170,7 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
       ),
     );
 
-    if (widget.openedByPush) {
-      if (widget.pushUrl == null || widget.pushUrl!.isEmpty) {
-        sendEvent('push_open_webview');
-      } else {
-        sendEvent('push_open_browser');
-      }
-      isPush = false;
-    }
+
 
     _initialize();
 

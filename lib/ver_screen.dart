@@ -42,6 +42,15 @@ Future<void> setUpOneSignal() async {
 
     // Отримуємо дані з push
     urlPush = (openedEvent.notification.launchUrl as String?)?.trim();
+
+    if (isPush) {
+      if (urlPush == null ||urlPush!.isEmpty) {
+        sendEvent('push_open_webview');
+      } else {
+        sendEvent('push_open_browser');
+      }
+      isPush = false;
+    }
   });
 }
 
