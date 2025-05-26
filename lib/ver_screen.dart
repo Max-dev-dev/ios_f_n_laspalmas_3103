@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:io';
+import 'package:advertising_id/advertising_id.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:momento_las_palmas/main.dart';
@@ -48,6 +50,11 @@ Future<void> setUpOneSignal() async {
 // Відправка тегу OneSignal
 Future<void> sendTagByOneSignal(String tsId) async {
   await OneSignal.User.addTagWithKey('timestamp_user_id', tsId);
+}
+
+Future<void> _requestAppTracking() async {
+  final status = await AppTrackingTransparency.requestTrackingAuthorization();
+  debugPrint('AppTrackingTransparency status: $status');
 }
 
 // Перевірка локації
@@ -225,7 +232,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
         }
 
         // 6) ATT + IDFA
-        final idfa = await DeviceIdentifiers.requestTrackingAndGetIdfa() ?? '';
+        await AppTrackingTransparency.requestTrackingAuthorization();
+        final String idfa = (await AdvertisingId.id(true)) ?? '';
         await prefs.setString('advertising_id', idfa);
 
         // 7) IDFV
@@ -340,20 +348,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
 class DeviceIdentifiers {
   static const _channel = MethodChannel('app.id.values');
 
-  static Future<String?> requestTrackingAndGetIdfa() async {
-    try {
-      final idfa = await _channel.invokeMethod<String>('requestTrackingAndGetIdfa');
-      return idfa;
-    } on PlatformException catch (e) {
-      debugPrint('Error fetching IDFA: $e');
-      return null;
-    }
-  }
-
   static Future<String?> getIdfv() async {
     try {
-      final idfv = await _channel.invokeMethod<String>('getIdfv');
-      return idfv;
+      return await _channel.invokeMethod<String>('getIdfv');
     } on PlatformException catch (e) {
       debugPrint('Error fetching IDFV: $e');
       return null;
