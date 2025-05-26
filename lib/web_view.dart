@@ -163,12 +163,16 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.black,
-        systemNavigationBarColor: Colors.black,
-      ),
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+    ));
+
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
     );
+
 
     if (widget.openedByPush) {
       if (widget.pushUrl == null || widget.pushUrl!.isEmpty) {
@@ -223,9 +227,8 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
           top: true,
           bottom: true,
           child: InAppWebView(
-
-            // initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-              initialUrlRequest: URLRequest(url: WebUri('https://21bdmbet38.com/')),
+            initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+            //   initialUrlRequest: URLRequest(url: WebUri('https://21bdmbet38.com/')),
             initialSettings: InAppWebViewSettings(
               transparentBackground: true,
               mediaPlaybackRequiresUserGesture: false,
