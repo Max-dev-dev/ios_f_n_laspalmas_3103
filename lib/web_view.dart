@@ -228,7 +228,6 @@ class _UrlWebViewAppState extends State<UrlWebViewApp> {
           bottom: true,
           child: InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-            //   initialUrlRequest: URLRequest(url: WebUri('https://21bdmbet38.com/')),
             initialSettings: InAppWebViewSettings(
               transparentBackground: true,
               mediaPlaybackRequiresUserGesture: false,

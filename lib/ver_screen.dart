@@ -92,7 +92,10 @@ Future<Map<String, String>> setUpConversionTimer(AppsflyerSdk sdk) {
   final completer = Completer<Map<String, String>>();
 
   void completeEmpty() {
-    completer.complete({for (var i = 1; i <= 8; i++) 'swed_$i': ''});
+    completer.complete({
+      for (var i = 1; i <= 8; i++) 'swed_$i': '',
+      'keyword': '',
+    });
   }
 
   final timeout = Timer(const Duration(seconds: 10), () {
@@ -102,7 +105,7 @@ Future<Map<String, String>> setUpConversionTimer(AppsflyerSdk sdk) {
   sdk.onInstallConversionData((data) {
     if (completer.isCompleted) return;
     timeout.cancel();
-
+    debugPrint('🔄 InstallConversionData: $data');
     final status = (data['status'] as String?)?.trim() ?? '';
     final payload = data['payload'] as Map<String, dynamic>?;
     final afStat = (payload?['af_status'] as String?)?.trim() ?? '';
@@ -129,6 +132,7 @@ Future<Map<String, String>> setUpConversionTimer(AppsflyerSdk sdk) {
     final swed6 = (payload['af_ad'] as String?)?.trim() ?? '';
     final swed7 = (payload['media_source'] as String?)?.trim() ?? '';
     final swed8 = (payload['af_channel'] as String?)?.trim() ?? '';
+    final keyword = (payload['af_keywords'] as String?)?.trim() ?? '';
 
     completer.complete({
       'swed_1': swed1,
@@ -139,6 +143,7 @@ Future<Map<String, String>> setUpConversionTimer(AppsflyerSdk sdk) {
       'swed_6': swed6,
       'swed_7': swed7,
       'swed_8': swed8,
+      'keyword': keyword,
     });
   });
 
@@ -275,6 +280,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
         final swed6 = swedMap['swed_6']!;
         final swed7 = swedMap['swed_7']!;
         final swed8 = swedMap['swed_8']!;
+        final keyword = swedMap['keyword']!;
 
         debugPrint('🔧 Params → googleId: $idFv, afId: $afId, osId: $osId, '
             'tsId: $tsId, adFa: $adFa, '
@@ -296,7 +302,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
             '&swed_5=$swed5'
             '&swed_6=$swed6'
             '&swed_7=$swed7'
-            '&swed_8=$swed8';
+            '&swed_8=$swed8'
+            '&keyword=$keyword';
 
         debugPrint('🌐 Built urlWeb: $urlWeb');
         await prefs.setString('url_web', urlWeb!);
