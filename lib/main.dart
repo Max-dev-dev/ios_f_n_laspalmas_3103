@@ -11,31 +11,37 @@ import 'package:momento_las_palmas/ver_screen.dart';
 import 'package:momento_las_palmas/web_view.dart';
 
 void main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(
+    widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
+  );
 
   await setupDependencies();
 
   final now = DateTime.now();
   final dateOff = DateTime(2025, 5, 29, 9, 0);
+  final initialRoute = now.isBefore(dateOff) ? '/white' : '/verify';
 
   runApp(
     BlocProvider<LoadingCubit>(
       create: (_) => getIt<LoadingCubit>()..loadApp(),
-      child: RootApp(now: now, dateOff: dateOff),
+      child: RootApp(
+        initialRoute: initialRoute,
+        whiteScreen: const MainApp(),
+      ),
     ),
   );
 }
 
 class RootApp extends StatelessWidget {
-  final DateTime now;
-  final DateTime dateOff;
+  final String initialRoute;
+  final Widget whiteScreen;
 
   const RootApp({
-    required this.now,
-    required this.dateOff,
-    super.key,
-  });
+    Key? key,
+    required this.initialRoute,
+    required this.whiteScreen,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +50,14 @@ class RootApp extends StatelessWidget {
         if (state is LoadingInitial || state is LoadingInProgressState) {
           return const SizedBox.shrink();
         }
-        final initialRoute = now.isBefore(dateOff) ? '/white' : '/verify';
-
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           initialRoute: initialRoute,
           routes: {
-            '/white': (_) => const MainApp(),
+            '/white': (_) => whiteScreen,
             '/verify': (_) => const VerificationScreen(),
             '/webview': (ctx) {
-              final args =
-              ModalRoute.of(ctx)!.settings.arguments as UrlWebViewArgs;
+              final args = ModalRoute.of(ctx)!.settings.arguments as UrlWebViewArgs;
               return UrlWebViewApp(
                 url: args.url,
                 pushUrl: args.pushUrl,
