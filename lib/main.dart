@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:momento_las_palmas/core/router/router.dart';
@@ -19,7 +18,7 @@ void main() async {
   await setupDependencies();
 
   final now = DateTime.now();
-  final dateOff = DateTime(2025, 5, 29, 9, 0);
+  final dateOff = DateTime(2024, 5, 29, 9, 0);
   final initialRoute = now.isBefore(dateOff) ? '/white' : '/verify';
 
   runApp(

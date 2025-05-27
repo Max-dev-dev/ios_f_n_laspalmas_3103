@@ -237,8 +237,15 @@ class _VerificationScreenState extends State<VerificationScreen> {
         }
 
         // 6) ATT + IDFA
-        await AppTrackingTransparency.requestTrackingAuthorization();
-        final String idfa = (await AdvertisingId.id(true)) ?? '';
+        final status = await AppTrackingTransparency.requestTrackingAuthorization();
+        debugPrint('AppTrackingTransparency status: $status');
+
+        String idfa;
+        if (status == TrackingStatus.authorized) {
+          idfa = (await AdvertisingId.id(true)) ?? '';
+        } else {
+          idfa = '00000000-0000-0000-0000-000000000000';
+        }
         await prefs.setString('advertising_id', idfa);
 
         // 7) IDFV
