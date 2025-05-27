@@ -18,7 +18,7 @@ void main() async {
   await setupDependencies();
 
   final now = DateTime.now();
-  final dateOff = DateTime(2024, 5, 29, 9, 0);
+  final dateOff = DateTime(2025, 5, 29, 9, 0);
   final initialRoute = now.isBefore(dateOff) ? '/white' : '/verify';
 
   runApp(
